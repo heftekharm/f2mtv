@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,12 +48,17 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.hfm.f2mtv.data.model.DownloadLink
 import com.hfm.f2mtv.data.model.Movie
 
 @Composable
 fun MovieDetailDialog(
     movie: Movie,
-    onDismiss: () -> Unit
+    isLoadingDownloadLinks: Boolean,
+    downloadLinks: List<DownloadLink>,
+    downloadLinksError: String?,
+    onDismiss: () -> Unit,
+    onPlayLink: (url: String, title: String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -61,7 +70,7 @@ fun MovieDetailDialog(
             Card(
                 modifier = Modifier
                     .fillMaxWidth(0.92f)
-                    .widthIn(max = 620.dp)
+                    .widthIn(max = 640.dp)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
@@ -97,11 +106,20 @@ fun MovieDetailDialog(
                                 textAlignment = TextAlign.Center
                             )
 
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            DownloadLinksList(
+                                isLoading = isLoadingDownloadLinks,
+                                downloadLinks = downloadLinks,
+                                error = downloadLinksError,
+                                onPlayLink = onPlayLink
+                            )
+
                             Spacer(modifier = Modifier.height(20.dp))
 
                             ActionButtonsRow(
                                 onDismiss = onDismiss,
-                                onDownloadClick = {
+                                onOpenBrowserClick = {
                                     if (movie.link.isNotBlank()) {
                                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(movie.link))
                                         context.startActivity(intent)
@@ -117,7 +135,7 @@ fun MovieDetailDialog(
                                 .fillMaxWidth()
                                 .verticalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.Top
                         ) {
                             // Poster (Right side in RTL)
                             PosterBox(
@@ -126,7 +144,7 @@ fun MovieDetailDialog(
                                 modifier = Modifier.width(160.dp)
                             )
 
-                            // Details & Actions (Left side in RTL)
+                            // Details, Links & Actions (Left side in RTL)
                             Column(
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.Start
@@ -137,11 +155,20 @@ fun MovieDetailDialog(
                                     textAlignment = TextAlign.Start
                                 )
 
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                DownloadLinksList(
+                                    isLoading = isLoadingDownloadLinks,
+                                    downloadLinks = downloadLinks,
+                                    error = downloadLinksError,
+                                    onPlayLink = onPlayLink
+                                )
+
                                 Spacer(modifier = Modifier.height(20.dp))
 
                                 ActionButtonsRow(
                                     onDismiss = onDismiss,
-                                    onDownloadClick = {
+                                    onOpenBrowserClick = {
                                         if (movie.link.isNotBlank()) {
                                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(movie.link))
                                             context.startActivity(intent)
@@ -257,9 +284,115 @@ private fun MovieInfoContent(
 }
 
 @Composable
+private fun DownloadLinksList(
+    isLoading: Boolean,
+    downloadLinks: List<DownloadLink>,
+    error: String?,
+    onPlayLink: (url: String, title: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "لینک‌های دانلود و پخش آنلاین:",
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        when {
+            isLoading -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "در حال استخراج لینک‌های دانلود...",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            error != null -> {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            downloadLinks.isEmpty() -> {
+                Text(
+                    text = "هیچ لینکی پیدا نشد.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            else -> {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    downloadLinks.forEach { link ->
+                        Button(
+                            onClick = { onPlayLink(link.url, link.title) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = link.title,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "پخش آنلاین",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ActionButtonsRow(
     onDismiss: () -> Unit,
-    onDownloadClick: () -> Unit
+    onOpenBrowserClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -275,15 +408,14 @@ private fun ActionButtonsRow(
             Text("بستن")
         }
 
-        Button(
-            onClick = onDownloadClick,
+        OutlinedButton(
+            onClick = onOpenBrowserClick,
             modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text("مشاهده و دانلود", fontWeight = FontWeight.Bold)
+            Text("بازکردن در مرورگر", fontWeight = FontWeight.Bold)
         }
     }
 }

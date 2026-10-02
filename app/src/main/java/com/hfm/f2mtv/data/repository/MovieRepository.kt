@@ -1,5 +1,6 @@
 package com.hfm.f2mtv.data.repository
 
+import com.hfm.f2mtv.data.model.DownloadLink
 import com.hfm.f2mtv.data.model.Movie
 import com.hfm.f2mtv.data.model.MoviePageResult
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,78 @@ class MovieRepository {
                 totalPages = totalPages,
                 hasNextPage = hasNext
             )
+        }
+    }
+
+    suspend fun fetchDownloadLinks(movieUrl: String): Result<List<DownloadLink>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val doc = Jsoup.connect(movieUrl)
+                .userAgent(userAgent)
+                .timeout(15000)
+                .followRedirects(true)
+                .get()
+
+            val downloadLinks = mutableListOf<DownloadLink>()
+            val links = doc.select("a[href], a[data-href], a[data-src]")
+
+            for (link in links) {
+                val href = link.absUrl("href")
+                    .ifBlank { link.absUrl("data-href") }
+                    .ifBlank { link.absUrl("data-src") }
+                    .ifBlank { link.attr("href") }
+                    .trim()
+
+                if (href.isBlank() || href.startsWith("#") || href.startsWith("javascript:")) continue
+
+                val text = link.text().trim()
+                val parentText = link.parent()?.text()?.trim() ?: ""
+
+                val cleanPath = href.substringBefore('?').substringBefore('#')
+
+                val isVideoUrl = cleanPath.endsWith(".mp4", ignoreCase = true) ||
+                        cleanPath.endsWith(".mkv", ignoreCase = true) ||
+                        cleanPath.endsWith(".avi", ignoreCase = true) ||
+                        cleanPath.endsWith(".m3u8", ignoreCase = true) ||
+                        cleanPath.endsWith(".mpd", ignoreCase = true) ||
+                        cleanPath.endsWith(".ts", ignoreCase = true) ||
+                        cleanPath.endsWith(".mov", ignoreCase = true) ||
+                        cleanPath.endsWith(".webm", ignoreCase = true) ||
+                        href.contains("/download/", ignoreCase = true) ||
+                        href.contains("dl.f2m", ignoreCase = true) ||
+                        href.contains("dl2.f2m", ignoreCase = true) ||
+                        href.contains("dl3.f2m", ignoreCase = true) ||
+                        href.contains("/dl/", ignoreCase = true) ||
+                        link.hasClass("btn-download") ||
+                        link.parent()?.hasClass("dl-box") == true ||
+                        link.parent()?.hasClass("download") == true
+
+                val isExcluded = cleanPath.endsWith(".jpg", ignoreCase = true) ||
+                        cleanPath.endsWith(".png", ignoreCase = true) ||
+                        cleanPath.endsWith(".webp", ignoreCase = true) ||
+                        cleanPath.endsWith(".zip", ignoreCase = true) ||
+                        cleanPath.endsWith(".rar", ignoreCase = true) ||
+                        cleanPath.endsWith(".srt", ignoreCase = true) ||
+                        href.contains("/category/", ignoreCase = true) ||
+                        href.contains("/tag/", ignoreCase = true) ||
+                        href == movieUrl
+
+                if (isVideoUrl && !isExcluded) {
+                    val displayTitle = when {
+                        text.isNotBlank() && text.length > 3 && !text.equals("دانلود", ignoreCase = true) -> text
+                        parentText.isNotBlank() && parentText.length < 120 -> parentText
+                        else -> href.substringAfterLast('/').substringBefore('?')
+                    }
+
+                    downloadLinks.add(
+                        DownloadLink(
+                            title = displayTitle,
+                            url = href
+                        )
+                    )
+                }
+            }
+
+            downloadLinks.distinctBy { it.url }
         }
     }
 

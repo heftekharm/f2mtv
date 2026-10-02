@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hfm.f2mtv.ui.main.components.MovieCard
 import com.hfm.f2mtv.ui.main.components.MovieDetailDialog
+import com.hfm.f2mtv.ui.main.components.VideoPlayerDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -167,7 +168,20 @@ fun MainScreen(
                     uiState.selectedMovie?.let { movie ->
                         MovieDetailDialog(
                             movie = movie,
-                            onDismiss = { viewModel.selectMovie(null) }
+                            isLoadingDownloadLinks = uiState.isLoadingDownloadLinks,
+                            downloadLinks = uiState.downloadLinks,
+                            downloadLinksError = uiState.downloadLinksError,
+                            onDismiss = { viewModel.selectMovie(null) },
+                            onPlayLink = { url, title -> viewModel.playVideo(url, title) }
+                        )
+                    }
+
+                    // ExoPlayer Video Player Dialog
+                    if (uiState.activePlayingUrl != null) {
+                        VideoPlayerDialog(
+                            videoUrl = uiState.activePlayingUrl!!,
+                            title = uiState.activePlayingTitle ?: uiState.selectedMovie?.title ?: "پخش ویدیو",
+                            onDismiss = { viewModel.stopVideo() }
                         )
                     }
                 }

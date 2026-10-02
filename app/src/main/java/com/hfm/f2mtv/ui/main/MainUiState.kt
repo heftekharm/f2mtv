@@ -1,5 +1,6 @@
 package com.hfm.f2mtv.ui.main
 
+import com.hfm.f2mtv.data.model.DownloadLink
 import com.hfm.f2mtv.data.model.Movie
 
 data class MainUiState(
@@ -12,6 +13,11 @@ data class MainUiState(
     val hasNextPage: Boolean = false,
     val error: String? = null,
     val selectedMovie: Movie? = null,
+    val isLoadingDownloadLinks: Boolean = false,
+    val downloadLinks: List<DownloadLink> = emptyList(),
+    val downloadLinksError: String? = null,
+    val activePlayingUrl: String? = null,
+    val activePlayingTitle: String? = null,
     val selectedGenreFilter: String? = null,
     val searchQuery: String = ""
 ) {

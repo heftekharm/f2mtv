@@ -82,7 +82,59 @@ class MainViewModel(
     }
 
     fun selectMovie(movie: Movie?) {
-        _uiState.update { it.copy(selectedMovie = movie) }
+        _uiState.update {
+            it.copy(
+                selectedMovie = movie,
+                downloadLinks = emptyList(),
+                isLoadingDownloadLinks = movie != null,
+                downloadLinksError = null
+            )
+        }
+
+        if (movie != null) {
+            fetchDownloadLinks(movie.link)
+        }
+    }
+
+    private fun fetchDownloadLinks(movieUrl: String) {
+        viewModelScope.launch {
+            repository.fetchDownloadLinks(movieUrl)
+                .onSuccess { links ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingDownloadLinks = false,
+                            downloadLinks = links,
+                            downloadLinksError = if (links.isEmpty()) "هیچ لینک دانلودی پیدا نشد." else null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingDownloadLinks = false,
+                            downloadLinksError = error.localizedMessage ?: "خطا در دریافت لینک‌های دانلود"
+                        )
+                    }
+                }
+        }
+    }
+
+    fun playVideo(url: String, title: String) {
+        _uiState.update {
+            it.copy(
+                activePlayingUrl = url,
+                activePlayingTitle = title
+            )
+        }
+    }
+
+    fun stopVideo() {
+        _uiState.update {
+            it.copy(
+                activePlayingUrl = null,
+                activePlayingTitle = null
+            )
+        }
     }
 
     fun filterByGenre(genre: String?) {
