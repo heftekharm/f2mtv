@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +50,7 @@ fun MovieDetailDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF1A1A1A)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
             Column(
@@ -64,7 +65,7 @@ fun MovieDetailDialog(
                         .width(160.dp)
                         .aspectRatio(0.68f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF2A2A2A))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(context)
@@ -82,7 +83,7 @@ fun MovieDetailDialog(
                 // Title
                 Text(
                     text = movie.title,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -91,7 +92,7 @@ fun MovieDetailDialog(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = movie.farsiTitle,
-                        color = Color(0xFFCCCCCC),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 }
@@ -103,10 +104,18 @@ fun MovieDetailDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (movie.isDubbed) {
-                        DetailBadge(text = "دوبله فارسی", color = Color(0xFF96F207), textColor = Color.Black)
+                        DetailBadge(
+                            text = "دوبله فارسی",
+                            color = MaterialTheme.colorScheme.primary,
+                            textColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                     if (movie.hasSubtitle) {
-                        DetailBadge(text = "زیرنویس چسبیده", color = Color(0xFF1E88E5), textColor = Color.White)
+                        DetailBadge(
+                            text = "زیرنویس چسبیده",
+                            color = MaterialTheme.colorScheme.secondary,
+                            textColor = MaterialTheme.colorScheme.onSecondary
+                        )
                     }
                 }
 
@@ -114,7 +123,7 @@ fun MovieDetailDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = movie.updateInfo,
-                        color = Color(0xFFFFD700),
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -124,7 +133,7 @@ fun MovieDetailDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "ژانرها: ${movie.genres.joinToString("، ")}",
-                        color = Color(0xFFAAAAAA),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
                 }
@@ -140,7 +149,7 @@ fun MovieDetailDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Text("بستن")
@@ -155,8 +164,8 @@ fun MovieDetailDialog(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF96F207),
-                            contentColor = Color.Black
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
                         Text("مشاهده و دانلود", fontWeight = FontWeight.Bold)

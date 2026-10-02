@@ -58,7 +58,7 @@ fun MovieCard(
     )
 
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) Color(0xFF96F207) else Color.Transparent,
+        targetValue = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
         label = "borderColor"
     )
 
@@ -75,7 +75,7 @@ fun MovieCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isFocused) 12.dp else 4.dp
@@ -90,7 +90,7 @@ fun MovieCard(
                     .fillMaxWidth()
                     .aspectRatio(0.68f)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                    .background(Color(0xFF121212))
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -110,7 +110,7 @@ fun MovieCard(
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.Black.copy(alpha = 0.8f),
+                                    MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
                                     Color.Transparent
                                 )
                             )
@@ -127,15 +127,15 @@ fun MovieCard(
                     if (movie.isDubbed) {
                         BadgeChip(
                             text = "دوبله",
-                            backgroundColor = Color(0xFF96F207),
-                            textColor = Color.Black
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            textColor = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     if (movie.hasSubtitle) {
                         BadgeChip(
                             text = "زیرنویس",
-                            backgroundColor = Color(0xFF1E88E5),
-                            textColor = Color.White
+                            backgroundColor = MaterialTheme.colorScheme.secondary,
+                            textColor = MaterialTheme.colorScheme.onSecondary
                         )
                     }
                 }
@@ -150,7 +150,7 @@ fun MovieCard(
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color.Black.copy(alpha = 0.85f)
+                                        MaterialTheme.colorScheme.scrim.copy(alpha = 0.85f)
                                     )
                                 )
                             )
@@ -158,7 +158,7 @@ fun MovieCard(
                     ) {
                         Text(
                             text = movie.updateInfo,
-                            color = Color(0xFFFFD700),
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
@@ -179,7 +179,7 @@ fun MovieCard(
                 Text(
                     text = movie.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                     maxLines = 1,
@@ -193,7 +193,7 @@ fun MovieCard(
                     Text(
                         text = movie.farsiTitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFCCCCCC),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 10.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -205,7 +205,7 @@ fun MovieCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = movie.genres.joinToString(" • "),
-                        color = Color(0xFF96F207),
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,

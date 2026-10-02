@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -46,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -84,10 +84,10 @@ fun MainScreen(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF121212)
+            color = MaterialTheme.colorScheme.background
         ) {
             Scaffold(
-                containerColor = Color(0xFF121212),
+                containerColor = MaterialTheme.colorScheme.background,
                 topBar = {
                     TopHeaderBar(
                         uiState = uiState,
@@ -152,7 +152,7 @@ fun MainScreen(
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 CircularProgressIndicator(
-                                                    color = Color(0xFF96F207),
+                                                    color = MaterialTheme.colorScheme.primary,
                                                     modifier = Modifier.size(32.dp)
                                                 )
                                             }
@@ -188,7 +188,7 @@ private fun TopHeaderBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1E1E1E))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(vertical = 12.dp)
     ) {
         Row(
@@ -206,12 +206,12 @@ private fun TopHeaderBar(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF96F207)),
+                        .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "F2M",
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Black,
                         fontSize = 12.sp
                     )
@@ -222,13 +222,13 @@ private fun TopHeaderBar(
                 Column {
                     Text(
                         text = "فیلم 2 مدیا",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
                     Text(
                         text = "صفحه ${uiState.currentPage} از ${uiState.totalPages}",
-                        color = Color(0xFF888888),
+                        color = MaterialTheme.colorScheme.outlineVariant,
                         fontSize = 11.sp
                     )
                 }
@@ -242,8 +242,8 @@ private fun TopHeaderBar(
                 Button(
                     onClick = { isSearchExpanded = !isSearchExpanded },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSearchExpanded) Color(0xFF96F207) else Color(0xFF2A2A2A),
-                        contentColor = if (isSearchExpanded) Color.Black else Color.White
+                        containerColor = if (isSearchExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = if (isSearchExpanded) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                     ),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
@@ -258,8 +258,8 @@ private fun TopHeaderBar(
                 Button(
                     onClick = onRefresh,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2A2A2A),
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface
                     ),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
@@ -282,17 +282,17 @@ private fun TopHeaderBar(
                 OutlinedTextField(
                     value = uiState.searchQuery,
                     onValueChange = onSearchQueryChanged,
-                    placeholder = { Text("جستجوی نام فیلم...", color = Color.Gray, fontSize = 13.sp) },
+                    placeholder = { Text("جستجوی نام فیلم...", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF282828),
-                        unfocusedContainerColor = Color(0xFF282828),
-                        focusedBorderColor = Color(0xFF96F207),
-                        unfocusedBorderColor = Color(0xFF444444),
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                 )
@@ -312,10 +312,10 @@ private fun TopHeaderBar(
                         onClick = { onGenreSelected("") },
                         label = { Text("همه") },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF96F207),
-                            selectedLabelColor = Color.Black,
-                            containerColor = Color(0xFF282828),
-                            labelColor = Color.White
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            labelColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 }
@@ -327,10 +327,10 @@ private fun TopHeaderBar(
                         onClick = { onGenreSelected(genre) },
                         label = { Text(genre) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF96F207),
-                            selectedLabelColor = Color.Black,
-                            containerColor = Color(0xFF282828),
-                            labelColor = Color.White
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            labelColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 }
@@ -350,12 +350,12 @@ private fun LoadingView() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CircularProgressIndicator(
-                color = Color(0xFF96F207),
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 3.dp
             )
             Text(
                 text = "در حال دریافت لیست فیلم‌ها...",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 14.sp
             )
         }
@@ -379,21 +379,21 @@ private fun ErrorView(
         ) {
             Text(
                 text = "خطا در دریافت اطلاعات",
-                color = Color(0xFFFF5252),
+                color = MaterialTheme.colorScheme.error,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = message,
-                color = Color.LightGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
             Button(
                 onClick = onRetry,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF96F207),
-                    contentColor = Color.Black
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text("تلاش مجدد", fontWeight = FontWeight.Bold)
@@ -419,7 +419,7 @@ private fun EmptyView(
         ) {
             Text(
                 text = "فیلمی یافت نشد!",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -430,7 +430,7 @@ private fun EmptyView(
             }
             Text(
                 text = hint,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
