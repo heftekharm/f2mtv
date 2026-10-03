@@ -351,7 +351,7 @@ private fun DownloadLinksList(
                 ) {
                     downloadLinks.forEach { link ->
                         Button(
-                            onClick = { onPlayLink(link.url, link.title) },
+                            onClick = { onPlayLink(link.url, "پخش") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -366,7 +366,7 @@ private fun DownloadLinksList(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = link.title,
+                                    text = link.quality ?: "",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium,
                                     maxLines = 1,

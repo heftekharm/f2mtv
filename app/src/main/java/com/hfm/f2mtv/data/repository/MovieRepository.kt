@@ -64,67 +64,18 @@ class MovieRepository {
                 .followRedirects(true)
                 .get()
 
-            val downloadLinks = mutableListOf<DownloadLink>()
-            val links = doc.select("a[href], a[data-href], a[data-src]")
+            doc.select("a[download]").mapNotNull { a ->
+                val url = a.attr("href").trim()
+                if (url.isEmpty()) return@mapNotNull null
 
-            for (link in links) {
-                val href = link.absUrl("href")
-                    .ifBlank { link.absUrl("data-href") }
-                    .ifBlank { link.absUrl("data-src") }
-                    .ifBlank { link.attr("href") }
-                    .trim()
+                val quality = a.closest("div.row")
+                    ?.selectFirst("span.text")
+                    ?.text()
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() }
 
-                if (href.isBlank() || href.startsWith("#") || href.startsWith("javascript:")) continue
-
-                val text = link.text().trim()
-                val parentText = link.parent()?.text()?.trim() ?: ""
-
-                val cleanPath = href.substringBefore('?').substringBefore('#')
-
-                val isVideoUrl = cleanPath.endsWith(".mp4", ignoreCase = true) ||
-                        cleanPath.endsWith(".mkv", ignoreCase = true) ||
-                        cleanPath.endsWith(".avi", ignoreCase = true) ||
-                        cleanPath.endsWith(".m3u8", ignoreCase = true) ||
-                        cleanPath.endsWith(".mpd", ignoreCase = true) ||
-                        cleanPath.endsWith(".ts", ignoreCase = true) ||
-                        cleanPath.endsWith(".mov", ignoreCase = true) ||
-                        cleanPath.endsWith(".webm", ignoreCase = true) ||
-                        href.contains("/download/", ignoreCase = true) ||
-                        href.contains("dl.f2m", ignoreCase = true) ||
-                        href.contains("dl2.f2m", ignoreCase = true) ||
-                        href.contains("dl3.f2m", ignoreCase = true) ||
-                        href.contains("/dl/", ignoreCase = true) ||
-                        link.hasClass("btn-download") ||
-                        link.parent()?.hasClass("dl-box") == true ||
-                        link.parent()?.hasClass("download") == true
-
-                val isExcluded = cleanPath.endsWith(".jpg", ignoreCase = true) ||
-                        cleanPath.endsWith(".png", ignoreCase = true) ||
-                        cleanPath.endsWith(".webp", ignoreCase = true) ||
-                        cleanPath.endsWith(".zip", ignoreCase = true) ||
-                        cleanPath.endsWith(".rar", ignoreCase = true) ||
-                        cleanPath.endsWith(".srt", ignoreCase = true) ||
-                        href.contains("/category/", ignoreCase = true) ||
-                        href.contains("/tag/", ignoreCase = true) ||
-                        href == movieUrl
-
-                if (isVideoUrl && !isExcluded) {
-                    val displayTitle = when {
-                        text.isNotBlank() && text.length > 3 && !text.equals("دانلود", ignoreCase = true) -> text
-                        parentText.isNotBlank() && parentText.length < 120 -> parentText
-                        else -> href.substringAfterLast('/').substringBefore('?')
-                    }
-
-                    downloadLinks.add(
-                        DownloadLink(
-                            title = displayTitle,
-                            url = href
-                        )
-                    )
-                }
+                DownloadLink(url = url, quality = quality)
             }
-
-            downloadLinks.distinctBy { it.url }
         }
     }
 
@@ -145,10 +96,10 @@ class MovieRepository {
             ?: ""
 
         val isDubbed = article.select("i.icon[title*=دوبله]").isNotEmpty() ||
-                article.select("use[xlink:href*=#icon-dubbled]").isNotEmpty()
+            article.select("use[xlink:href*=#icon-dubbled]").isNotEmpty()
 
         val hasSubtitle = article.select("i.icon[title*=زیرنویس]").isNotEmpty() ||
-                article.select("use[xlink:href*=#icon-subtitled]").isNotEmpty()
+            article.select("use[xlink:href*=#icon-subtitled]").isNotEmpty()
 
         val genres = article.select("div.entry-ganers a").map { it.text().trim() }
 
