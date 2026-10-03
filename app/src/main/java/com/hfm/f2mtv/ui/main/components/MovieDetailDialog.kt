@@ -1,8 +1,6 @@
 package com.hfm.f2mtv.ui.main.components
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +11,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -80,6 +79,7 @@ fun MovieDetailDialog(
             Card(
                 modifier = Modifier
                     .fillMaxWidth(0.92f)
+                    .fillMaxHeight(0.9f)
                     .widthIn(max = 640.dp)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -90,6 +90,7 @@ fun MovieDetailDialog(
                 BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .fillMaxHeight()
                         .padding(20.dp)
                 ) {
                     val isCompact = maxWidth < 480.dp || maxHeight < 360.dp
@@ -128,64 +129,55 @@ fun MovieDetailDialog(
                             Spacer(modifier = Modifier.height(20.dp))
 
                             ActionButtonsRow(
-                                onDismiss = onDismiss,
-                                onOpenBrowserClick = {
-                                    if (movie.link.isNotBlank()) {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(movie.link))
-                                        context.startActivity(intent)
-                                    }
-                                }
+                                onDismiss = onDismiss
                             )
                         }
                     } else {
                         // Side-by-side Row for wider screens / TV / Landscape
-                        // In RTL, 1st item (Poster) is on the RIGHT, 2nd item (Column) is on the LEFT
+                        // In RTL, 1st item (movie info) is on the RIGHT, 2nd item (links) is on the LEFT
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
+                                .fillMaxHeight(),
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            // Poster (Right side in RTL)
-                            PosterBox(
-                                movie = movie,
-                                context = context,
-                                modifier = Modifier.width(160.dp)
-                            )
-
-                            // Details, Links & Actions (Left side in RTL)
+                            // Movie info side (poster, details, actions) — Right side in RTL
                             Column(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .width(200.dp)
+                                    .verticalScroll(rememberScrollState()),
                                 horizontalAlignment = Alignment.Start
                             ) {
+                                PosterBox(
+                                    movie = movie,
+                                    context = context,
+                                    modifier = Modifier.width(160.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
                                 MovieInfoContent(
                                     movie = movie,
                                     horizontalAlignment = Alignment.Start,
                                     textAlignment = TextAlign.Start
                                 )
 
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                DownloadLinksList(
-                                    isLoading = isLoadingDownloadLinks,
-                                    downloadLinks = downloadLinks,
-                                    error = downloadLinksError,
-                                    onPlayLink = onPlayLink
-                                )
-
                                 Spacer(modifier = Modifier.height(20.dp))
 
                                 ActionButtonsRow(
-                                    onDismiss = onDismiss,
-                                    onOpenBrowserClick = {
-                                        if (movie.link.isNotBlank()) {
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(movie.link))
-                                            context.startActivity(intent)
-                                        }
-                                    }
+                                    onDismiss = onDismiss
                                 )
                             }
+
+                            // Download links side (chips + scrollable list) — Left side in RTL
+                            DownloadLinksList(
+                                isLoading = isLoadingDownloadLinks,
+                                downloadLinks = downloadLinks,
+                                error = downloadLinksError,
+                                onPlayLink = onPlayLink,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
@@ -302,7 +294,7 @@ private fun DownloadLinksList(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxSize()
     ) {
         Text(
             text = "لینک‌های دانلود و پخش آنلاین:",
@@ -417,8 +409,7 @@ private fun DownloadLinksList(
                 } else {
                     LazyColumn(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 240.dp),
+                            .weight(1f).fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(visibleLinks, key = { it.url }) { link ->
@@ -465,7 +456,6 @@ private fun DownloadLinksList(
 @Composable
 private fun ActionButtonsRow(
     onDismiss: () -> Unit,
-    onOpenBrowserClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -479,16 +469,6 @@ private fun ActionButtonsRow(
             )
         ) {
             Text("بستن")
-        }
-
-        OutlinedButton(
-            onClick = onOpenBrowserClick,
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text("بازکردن در مرورگر", fontWeight = FontWeight.Bold)
         }
     }
 }
