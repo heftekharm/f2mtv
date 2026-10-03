@@ -77,10 +77,6 @@ class MainViewModel(
         }
     }
 
-    fun refresh() {
-        loadMovies(page = 1, isRefresh = true)
-    }
-
     fun selectMovie(movie: Movie?) {
         _uiState.update {
             it.copy(
@@ -135,16 +131,5 @@ class MainViewModel(
                 activePlayingTitle = null
             )
         }
-    }
-
-    fun filterByGenre(genre: String?) {
-        _uiState.update {
-            val newGenre = if (it.selectedGenreFilter == genre) null else genre
-            it.copy(selectedGenreFilter = newGenre)
-        }
-    }
-
-    fun onSearchQueryChanged(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
     }
 }

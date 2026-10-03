@@ -39,6 +39,4 @@ data class MainUiState(
             return list
         }
 
-    val availableGenres: List<String>
-        get() = movies.flatMap { it.genres }.distinct().sorted()
 }
