@@ -64,18 +64,36 @@ class MovieRepository {
                 .followRedirects(true)
                 .get()
 
-            doc.select("a[download]").mapNotNull { a ->
-                val url = a.attr("href").trim()
-                if (url.isEmpty()) return@mapNotNull null
+            val downloadLinks = mutableListOf<DownloadLink>()
 
-                val quality = a.closest("div.row")
-                    ?.selectFirst("span.text")
-                    ?.text()
-                    ?.trim()
-                    ?.takeIf { it.isNotEmpty() }
+            // 1. Iterate over elements with class "download-list"
+            val downloadLists = doc.select(".download-list")
 
-                DownloadLink(url = url, quality = quality)
+            for (downloadList in downloadLists) {
+                // 2. Get category from the first element with class "title"
+                val category = downloadList.selectFirst(".title")?.text()?.trim()
+
+                // 3. Iterate through all 'li' elements in the list
+                val liElements = downloadList.select("li")
+                for (li in liElements) {
+                    // 4. Extract URL from <a> element with 'download' attribute
+                    val downloadAnchor = li.selectFirst("a[download]")
+                    val url = downloadAnchor?.attr("href") ?: continue // Skip if no download link found
+
+                    // 5. Find the span containing "کیفیت" and retrieve its sibling span
+                    val qualityHeader = li.select("span").firstOrNull { it.text().contains("کیفیت") }
+                    val quality = qualityHeader?.nextElementSibling()?.text()?.trim()
+
+                    downloadLinks.add(
+                        DownloadLink(
+                            url = url,
+                            quality = quality,
+                            category = category
+                        )
+                    )
+                }
             }
+            downloadLinks
         }
     }
 
