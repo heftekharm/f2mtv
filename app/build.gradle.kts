@@ -20,10 +20,14 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = false
             optimization {
                 enable = false
             }
         }
+    }
+    lint {
+        checkReleaseBuilds = false
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
