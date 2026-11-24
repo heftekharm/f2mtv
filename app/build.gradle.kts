@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.hfm.f2mtv"
-        minSdk = 36
+        minSdk = 28
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
