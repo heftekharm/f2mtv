@@ -1,7 +1,25 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+val secretsFile = rootProject.file("secrets.properties")
+val secrets = Properties().apply {
+    if (secretsFile.exists()) {
+        secretsFile.inputStream().use { load(it) }
+    }
+}
+
+val releaseKeystorePath = providers.environmentVariable("KEYSTORE_PATH").orNull
+    ?: secrets.getProperty("KEYSTORE_PATH")
+val releaseKeystorePassword = providers.environmentVariable("KEYSTORE_PASSWORD").orNull
+    ?: secrets.getProperty("KEYSTORE_PASSWORD")
+val releaseKeyAlias = providers.environmentVariable("KEY_ALIAS").orNull
+    ?: secrets.getProperty("KEY_ALIAS")
+val releaseKeyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
+    ?: secrets.getProperty("KEY_PASSWORD")
 
 android {
     namespace = "com.hfm.f2mtv"
@@ -18,8 +36,22 @@ android {
 
     }
 
+    signingConfigs {
+        create("release") {
+            if (!releaseKeystorePath.isNullOrBlank()) {
+                storeFile = rootProject.file(releaseKeystorePath)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (!releaseKeystorePath.isNullOrBlank()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             optimization {
                 enable = false
